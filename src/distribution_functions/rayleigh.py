@@ -40,7 +40,8 @@ def plot_rayleigh(sigma_values: List[float], output_file: str = "rayleigh_plot.p
     print(f"Plot saved to {output_file}")
     plt.close()
 
-def rayleigh_2d(x: Union[float, np.ndarray], y: Union[float, np.ndarray], sigma: float = 1.0) -> Union[float, np.ndarray]:
+def rayleigh_2d(x: Union[float, np.ndarray], y: Union[float, np.ndarray], sigma: float = 1.0,
+                xShift: float = 0.0, yShift: float = 0.0) -> Union[float, np.ndarray]:
     """
     Calculate the 2D Rayleigh distribution PDF based on x and y coordinates.
     
@@ -57,11 +58,12 @@ def rayleigh_2d(x: Union[float, np.ndarray], y: Union[float, np.ndarray], sigma:
     """
     x = np.asarray(x)
     y = np.asarray(y)
-    r = np.sqrt(x**2 + y**2)
+    r = np.sqrt((x-xShift)**2 + (y-yShift)**2)
     return rayleigh_pdf(r, sigma)
 
 def plot_rayleigh_2d(sigma: float = 1.0, x_lim: tuple = (-5, 5), y_lim: tuple = (-5, 5), 
-                     output_file: str = "rayleigh_2d_plot.png", resolution: int = 100):
+                     output_file: str = "rayleigh_2d_plot.png", resolution: int = 100, 
+                     xShift: float = 0.0, yShift: float = 0.0):
     """
     Plot the 2D Rayleigh distribution as a 3D surface plot.
     
@@ -80,7 +82,7 @@ def plot_rayleigh_2d(sigma: float = 1.0, x_lim: tuple = (-5, 5), y_lim: tuple = 
     X, Y = np.meshgrid(x, y)
     
     # Calculate 2D Rayleigh PDF
-    Z = rayleigh_2d(X, Y, sigma)
+    Z = rayleigh_2d(x=X, y=Y, sigma=sigma, xShift=xShift, yShift=yShift)
     
     # Create 3D plot
     fig = plt.figure(figsize=(12, 8))
