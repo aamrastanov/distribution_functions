@@ -14,7 +14,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 class GaussianBasisGenerator:
-    def __init__(self, width=800, height=1200, sigma=15, step=10, limit_sigma=4):
+    def __init__(self, width=800, height=1200, sigma=15, step=10, limit_sigma=3):
         self.width = width
         self.height = height
         self.sigma = sigma
@@ -79,10 +79,9 @@ class GaussianBasisGenerator:
         grid_y, grid_x = np.meshgrid(np.arange(y_min, y_max), np.arange(x_min, x_max), indexing='ij')
         
         dist_sq = (grid_x - cx)**2 + (grid_y - cy)**2
-        A = 1.0 / (self.sigma * np.sqrt(2 * np.pi))
         denom = 2 * self.sigma**2
         
-        val = A * np.exp(-dist_sq / denom)
+        val = np.exp(-dist_sq / denom)
         
         img[y_min:y_max, x_min:x_max] = val
         

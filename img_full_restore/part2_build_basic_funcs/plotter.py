@@ -58,5 +58,5 @@ def plot_file(filename):
         logger.error(f"Failed to plot {filename}: {e}")
 
 if __name__ == "__main__":
-    input_file = "gauss162.txt"
+    input_file = "gauss2.txt"
     plot_file(input_file)
