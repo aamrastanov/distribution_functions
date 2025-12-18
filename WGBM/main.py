@@ -43,13 +43,18 @@ def main(input_path, output_path):
         # Отделяем низкочастотный фон (муть) от деталей
         LL, details = step_1_wavelet_decomposition(img_float)
 
-        # Шаг 2: Очистка слоя LL (удаление основной массы "тумана")
+        # Шаг 2.1: Очистка слоя LL (удаление основной массы "тумана")
         LL_clean = step_2_clean_ll_layer(LL)
+        
+        # Шаг 2.2: Пороговая фильтрация деталей
+        from processing_steps import step_2_threshold_details
+        details_thresholded = step_2_threshold_details(details, threshold=10.0)
 
         # Шаг 3-4: Реконструкция деталей через строгий Гаус-базис
-        # Здесь происходит свертка с ядром из перемноженных Гауссиан
+        # Передаем оригинальный LL для оценки карты прозрачности
         details_rec = step_3_4_wgm_reconstruction(
-            details, 
+            details_thresholded,
+            LL_original=LL,
             k=K_VAL, 
             step=STEP_VAL, 
             num_blocks=NUM_BLOCKS
@@ -73,6 +78,6 @@ if __name__ == "__main__":
     # Определяем путь к файлу относительно скрипта
     base_dir = os.path.dirname(os.path.abspath(__file__))
     input_file = os.path.join(base_dir, 'input.png')
-    output_file = os.path.join(base_dir, 'wgbm_restored3.png')
+    output_file = os.path.join(base_dir, 'wgbm_restored_fixed.png')
     
     main(input_file, output_file)
