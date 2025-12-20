@@ -155,3 +155,4 @@ cython_debug/
 # PyCharm
 .idea/
 WGBM/WGBM.pdf
+lateral_filters/JoG_Oct_2021_denoising.pdf

@@ -24,12 +24,47 @@ def step_2_threshold_details(details, threshold=10.0):
     
     return (LH_clean, HL_clean, HH_clean)
 
-def step_2_clean_ll_layer(LL):
-    logging.info("Шаг 2.1: Адаптивная очистка мути в LL слое (CLAHE)")
+def step_2_clean_ll_layer_clahe(LL):
+    logging.info("Шаг 2.1: Адаптивная очистка мути в LL слое (CLAHE) [Unused]")
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
     LL_u8 = cv2.normalize(LL, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
     # Возвращаем float32 для дальнейшей работы
     return clahe.apply(LL_u8).astype(np.float32)
+
+def step_2_clean_ll_layer_dcp(LL):
+    """
+    Шаг 2.1: Очистка LL слоя с использованием упрощенного Dark Channel Prior (DCP).
+    Модель: I(x) = J(x)t(x) + A(1-t(x))
+    Цель: восстановить J(x).
+    """
+    logging.info("Шаг 2.1: Адаптивная очистка мути в LL слое (Simplified DCP)")
+    
+    # 1. Оценка атмосферного света (A) и Dark Channel
+    # Для одного канала Dark Channel - это минимум в окрестности
+    patch_size = 15
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (patch_size, patch_size))
+    dark_channel = cv2.erode(LL, kernel)
+    
+    # A - это интенсивность самых ярких пикселей в темном канале (или просто макс)
+    # Берем макс из темного канала как грубую оценку A
+    A = np.max(dark_channel)
+    if A == 0: A = 1.0 # Защита
+    
+    # 2. Оценка Transmission Map t(x)
+    # t(x) = 1 - omega * min(I/A)
+    # min(I) это и есть dark_channel
+    omega = 0.9
+    t = 1.0 - omega * (dark_channel / A)
+    
+    # Ограничение t снизу, чтобы не делить на 0 и не усиливать шум слишком сильно
+    t0 = 0.1
+    t = np.maximum(t, t0)
+    
+    # 3. Восстановление сцены (Radiance Recover)
+    # J = (I - A)/t + A
+    J = (LL - A) / t + A
+    
+    return J
 
 def estimate_transmission(LL):
     """
@@ -47,7 +82,7 @@ def estimate_transmission(LL):
     T = 1.0 - LL_norm * 0.9 # *0.9 чтобы T не уходило в полный 0
     return T
 
-def step_3_4_wgm_reconstruction(details, LL_original, k, step, num_blocks):
+def step_3_4_wgm_reconstruction(details, LL_original):
     """
     Шаг 3-4: Полный цикл Анализ - Усиление - Синтез.
     
@@ -55,13 +90,22 @@ def step_3_4_wgm_reconstruction(details, LL_original, k, step, num_blocks):
     2. Усиление: C_k' = C_k * Gain(x), где Gain(x) ~ 1/T(x).
     3. Синтез: Восстанавливаем детали, проецируя C_k' обратно через базис.
     """
-    logging.info(f"Шаг 3-4: Реконструкция WGM (k={k}, blocks={num_blocks})")
     LH, HL, HH = details
     
     # Генерируем набор ядер (F1, F2, F3...)
     # kernel_size должен быть достаточным, чтобы вместить функции
-    # k=3, num_blocks=6, step=1 -> ширина ~ 3*6*1 = 18. 31 с запасом.
-    kernels = get_wgm_basis_matrix(kernel_size=31, k=k, step=step, num_blocks=num_blocks)
+    # k=3, num_blocks=6, step=1 -> эффективная ширина ~ 22. 25 с небольшим запасом.
+
+    # --- КОНФИГУРАЦИЯ ПАРАМЕТРОВ ВГМБ ---
+    k = 15          # k из примера
+    step = 1.0     # step из примера
+    num_blocks = 1     # num_blocks из примера
+    sigma = 1    
+    # ------------------------------------
+
+    logging.info(f"Шаг 3-4: Реконструкция WGM (k={k}, blocks={num_blocks})")
+
+    kernels = get_wgm_basis_matrix(sigma=sigma, k=k, step=step, num_blocks=num_blocks)
     
     # Карта прозрачности и усиления
     T = estimate_transmission(LL_original)
@@ -117,3 +161,12 @@ def step_3_4_wgm_reconstruction(details, LL_original, k, step, num_blocks):
 def step_5_inverse_wavelet(LL, details):
     logging.info("Шаг 5: Сборка IDWT")
     return pywt.idwt2((LL, details), 'db1')
+
+def step_5_post_processing(image):
+    """
+    Финальная постобработка:
+    1. Гамма-коррекция для осветления средних тонов (вода часто темная).
+    2. Выравнивание гистограммы.
+    """
+    # logging.info("Шаг 5.3: Финальная коррекция") [DISABLED]
+    return image

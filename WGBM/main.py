@@ -4,9 +4,11 @@ import logging
 import os
 from processing_steps import (
     step_1_wavelet_decomposition,
-    step_2_clean_ll_layer,
+    step_2_clean_ll_layer_dcp,
+    step_2_clean_ll_layer_clahe,
     step_3_4_wgm_reconstruction,
-    step_5_inverse_wavelet
+    step_5_inverse_wavelet,
+    step_5_post_processing
 )
 
 # Настройка подробного логирования
@@ -21,12 +23,6 @@ def main(input_path, output_path):
     input_path: путь к исходному PNG
     output_path: путь для сохранения результата
     """
-    
-    # --- КОНФИГУРАЦИЯ ПАРАМЕТРОВ ВГМБ ---
-    K_VAL = 3          # k из примера
-    STEP_VAL = 1.0     # step из примера
-    NUM_BLOCKS = 6     # num_blocks из примера
-    # ------------------------------------
 
     logging.info(f"--- СТАРТ ВГМБ: {input_path} ---")
     
@@ -43,21 +39,25 @@ def main(input_path, output_path):
         # Отделяем низкочастотный фон (муть) от деталей
         LL, details = step_1_wavelet_decomposition(img_float)
 
-        # Шаг 2.1: Очистка слоя LL (удаление основной массы "тумана")
-        LL_clean = step_2_clean_ll_layer(LL)
+        # Шаг 2: Очистка слоя LL (удаление основной массы "тумана")
+        # Используем метод CLAHE (Adaptive Histogram Equalization) как в PDF
+        from processing_steps import step_2_clean_ll_layer_clahe
+        LL_clean = step_2_clean_ll_layer_clahe(LL)
+
+
+        # Используем метод DCP (Simplified Dark Channel Prior) как в PDF
+        # from processing_steps import step_2_clean_ll_layer_dcp
+        # LL_clean = step_2_clean_ll_layer_dcp(LL)
         
         # Шаг 2.2: Пороговая фильтрация деталей
         from processing_steps import step_2_threshold_details
-        details_thresholded = step_2_threshold_details(details, threshold=10.0)
+        details_thresholded = step_2_threshold_details(details, threshold=5.0)
 
         # Шаг 3-4: Реконструкция деталей через строгий Гаус-базис
         # Передаем оригинальный LL для оценки карты прозрачности
         details_rec = step_3_4_wgm_reconstruction(
             details_thresholded,
-            LL_original=LL,
-            k=K_VAL, 
-            step=STEP_VAL, 
-            num_blocks=NUM_BLOCKS
+            LL_original=LL
         )
 
         # Шаг 5: Обратный синтез (IDWT)

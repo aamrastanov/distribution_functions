@@ -14,7 +14,7 @@ def generate_f_n(x, shift_index, k, step, sigma, num_blocks):
     Это прямая реализация вашего кода.
     """
     # Список центров mu_i
-    mu = [i * step for i in range(1, k * (num_blocks + 1) + 2 + shift_index)]
+    mu = [i * step for i in range(0, k * (num_blocks + 1) + 1 + shift_index)]
     
     f_n = np.zeros_like(x)
     for b in range(num_blocks):
@@ -26,12 +26,12 @@ def generate_f_n(x, shift_index, k, step, sigma, num_blocks):
         f_n += (-1) ** b * block
     return f_n
 
-def get_wgm_basis_matrix(kernel_size, k, step, num_blocks):
+def get_wgm_basis_matrix(sigma, k, step, num_blocks):
     """
     Создает набор базисных функций (ядер) для обработки изображения.
     """
-    sigma = k / 3.0
-    x = np.linspace(0, kernel_size, kernel_size)
+    kernel_size = int(step * k * (num_blocks + 1))
+    x = np.linspace(0, kernel_size, kernel_size + 1)
     
     # Мы генерируем несколько вариантов сдвигов (F1, F2, F3...)
     # для детекции разных фаз текстуры дна
