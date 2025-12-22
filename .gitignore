@@ -156,3 +156,5 @@ cython_debug/
 .idea/
 WGBM/WGBM.pdf
 lateral_filters/JoG_Oct_2021_denoising.pdf
+GBR/Correction_after_Puasson_solve.pdf
+GBR/Garbon_based_steps.pdf
