@@ -1,8 +1,17 @@
+import os
+import sys
+
+# Add current directory and project root to path for imports
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+# Two levels up to reach project root from base/plot_gabor/
+PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
+sys.path.insert(0, SCRIPT_DIR)
+sys.path.insert(0, PROJECT_ROOT)
+
 import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-import os
-from gabor_bank import create_gabor_bank
+from base.gabor_bank import create_gabor_bank
 
 def visualize_gabor_3d_interactive(orientations=2, scales=[2.0, 4.0], frequencies=[0.1], ksize=63):
     """

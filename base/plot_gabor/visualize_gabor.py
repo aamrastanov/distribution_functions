@@ -1,8 +1,17 @@
+import os
+import sys
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2
-import os
-from gabor_bank import create_gabor_bank
+
+# Add current directory and project root to path for imports
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+# Two levels up to reach project root from base/plot_gabor/
+PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
+sys.path.insert(0, SCRIPT_DIR)
+sys.path.insert(0, PROJECT_ROOT)
+
+from base.gabor_bank import create_gabor_bank
 
 def visualize_gabor_bank(orientations=4, scales=[2.0, 4.0], frequencies=[0.1, 0.2], ksize=63):
     """

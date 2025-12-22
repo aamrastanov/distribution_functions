@@ -9,27 +9,22 @@ import cv2
 import logging
 from datetime import datetime
 
-from dark_channel import (
+from base.dark_channel import (
     compute_dark_channel,
     estimate_atmospheric_light,
     estimate_transmission,
     refine_transmission
 )
-from gradient_ops import (
-    compute_gradients,
+from base.gradient_ops import (
     compute_gradients_color,
-    poisson_solve,
-    normalize_image
+    poisson_solve
 )
-from gabor_bank import (
+from base.gabor_bank import (
     create_gabor_bank,
-    gabor_decompose,
     gabor_decompose_color,
-    gabor_reconstruct,
     gabor_reconstruct_color
 )
 from correction import (
-    correct_coefficients,
     correct_coefficients_color
 )
 

@@ -25,9 +25,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Add current directory to path for imports
+# Add current directory and project root to path for imports
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
 sys.path.insert(0, SCRIPT_DIR)
+sys.path.insert(0, PROJECT_ROOT)
 
 from gbr_processor import GBRProcessor, enhance_with_original
 
