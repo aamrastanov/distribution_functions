@@ -213,3 +213,42 @@ def gabor_reconstruct_color(coefficients: list) -> tuple:
         gy_hat[:, :, c] = results[c][1]
     
     return gx_hat, gy_hat
+
+
+def create_gabor_1d_basis(ksize: int, scales: list, frequencies: list) -> np.ndarray:
+    """
+    Create a 1D Gabor basis matrix for windowed processing.
+    Each row is a normalized 1D Gabor function.
+    
+    Args:
+        ksize: Length of the 1D Gabor filter (match window size)
+        scales: List of sigma values
+        frequencies: List of frequencies (cycles per window)
+    
+    Returns:
+        Basis matrix (N_filters x ksize)
+    """
+    logger.info(f"Creating 1D Gabor basis: ksize={ksize}, {len(scales)} scales, {len(frequencies)} freqs")
+    
+    basis = []
+    
+    for sigma in scales:
+        for freq in frequencies:
+            # Frequency to wavelength conversion: cycles per window -> pixels per cycle (lambda)
+            lambd = ksize / freq
+            
+            # Using cv2.getGaborKernel for 1D: width=ksize, height=1
+            # theta=0 for horizontal, psi=0 for Cosine, psi=pi/2 for Sine
+            g_cos = cv2.getGaborKernel((ksize, 1), sigma, 0, lambd, 1.0, 0, ktype=cv2.CV_64F).flatten()
+            g_sin = cv2.getGaborKernel((ksize, 1), sigma, 0, lambd, 1.0, np.pi/2, ktype=cv2.CV_64F).flatten()
+            
+            # L2 Normalization
+            norm_cos = np.linalg.norm(g_cos)
+            norm_sin = np.linalg.norm(g_sin)
+            
+            if norm_cos > 1e-10:
+                basis.append(g_cos / norm_cos)
+            if norm_sin > 1e-10:
+                basis.append(g_sin / norm_sin)
+                
+    return np.array(basis, dtype=np.float32)

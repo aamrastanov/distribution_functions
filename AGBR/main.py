@@ -29,20 +29,20 @@ def main():
     parser.add_argument("output_path", nargs="?", default="output.png", help="Path to output image")
     
     # AGBR Parameters
-    parser.add_argument("--patch_size", type=int, default=15, help="Window size k (default: 15)")
-    parser.add_argument("--stride", type=int, default=4, help="Stride S (default: 4)")
+    parser.add_argument("--patch_size", type=int, default=51, help="Window size (default: 51)")
+    parser.add_argument("--stride", type=int, default=5, help="Stride step (default: 5)")
+    parser.add_argument("--block_size", type=int, default=5, help="Middle block size (default: 5)")
     parser.add_argument("--omega", type=float, default=0.99, help="Omega parameter (default: 0.99)")
-    parser.add_argument("--beta_high", type=float, default=0.7, help="Beta High (default: 0.7)")
-    parser.add_argument("--beta_low", type=float, default=0.3, help="Beta Low (default: 0.3)")
+    parser.add_argument("--beta_high", type=float, default=0.6, help="Beta High (default: 0.7)")
+    parser.add_argument("--beta_low", type=float, default=0.4, help="Beta Low (default: 0.3)")
     parser.add_argument("--r_min", type=float, default=0.05, help="R min threshold (default: 0.05)")
-    parser.add_argument("--eps_thresh", type=float, default=1e-6, help="Energy epsilon threshold (default: 1e-6)")
+    parser.add_argument("--eps_thresh", type=float, default=1e-9, help="Energy epsilon threshold (default: 1e-5)")
     
     # Gabor Parameters
-    parser.add_argument("--gabor_orientations", type=int, default=4, help="Gabor orientations (default: 4)")
-    parser.add_argument("--gabor_scales", type=float, nargs="+", default=[2.0, 8.0, 9.0, 10.0], 
-                        help="Gabor scales (default: 2.0 8.0 9.0 10.0)")
-    parser.add_argument("--gabor_frequencies", type=float, nargs="+", default=[0.5, 1.0, 2.5, 3.5, 6.5], 
-                        help="Gabor frequencies (default: 0.5 1.0 2.5 3.5 6.5)")
+    parser.add_argument("--gabor_scales", type=float, nargs="+", default=[1.0, 2.0, 4.0, 5.0, 7.0, 8.0], 
+                        help="Gabor scales (default: 1.0 2.0 4.0 5.0 7.0 8.0)")
+    parser.add_argument("--gabor_frequencies", type=float, nargs="+", default=[0.5, 2.0, 5.0, 10.0, 17.0, 23.0], 
+                        help="Gabor frequencies (default: 0.5 2.0 5.0 10.0 17.0 23.0)")
     
     args = parser.parse_args()
     
@@ -86,12 +86,12 @@ def main():
     processor = AGBRProcessor(
         patch_size=args.patch_size,
         stride=args.stride,
+        block_size=args.block_size,
         omega=args.omega,
         beta_high=args.beta_high,
         beta_low=args.beta_low,
         r_min=args.r_min,
         eps_thresh=args.eps_thresh,
-        gabor_orientations=args.gabor_orientations,
         gabor_scales=args.gabor_scales,
         gabor_frequencies=args.gabor_frequencies
     )
