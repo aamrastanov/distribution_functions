@@ -32,17 +32,15 @@ def main():
     parser.add_argument("--patch_size", type=int, default=51, help="Window size (default: 51)")
     parser.add_argument("--stride", type=int, default=5, help="Stride step (default: 5)")
     parser.add_argument("--block_size", type=int, default=5, help="Middle block size (default: 5)")
-    parser.add_argument("--omega", type=float, default=0.99, help="Omega parameter (default: 0.99)")
-    parser.add_argument("--beta_high", type=float, default=0.6, help="Beta High (default: 0.7)")
-    parser.add_argument("--beta_low", type=float, default=0.4, help="Beta Low (default: 0.3)")
-    parser.add_argument("--r_min", type=float, default=0.05, help="R min threshold (default: 0.05)")
-    parser.add_argument("--eps_thresh", type=float, default=1e-9, help="Energy epsilon threshold (default: 1e-5)")
+    parser.add_argument("--eps_thresh", type=float, default=1e-9, help="Energy epsilon threshold (default: 1e-9)")
+    parser.add_argument("--scattered_signal_suppress_coef", type=float, default=0.5, help="Suppression of high-scale signals (default: 0.1)")
+    parser.add_argument("--main_signal_ampligy_coef", type=float, default=0.5, help="Energy transfer ratio to prime scale (default: 0.5)")
     
     # Gabor Parameters
-    parser.add_argument("--gabor_scales", type=float, nargs="+", default=[1.0, 2.0, 4.0, 5.0, 7.0, 8.0], 
-                        help="Gabor scales (default: 1.0 2.0 4.0 5.0 7.0 8.0)")
-    parser.add_argument("--gabor_frequencies", type=float, nargs="+", default=[0.5, 2.0, 5.0, 10.0, 17.0, 23.0], 
-                        help="Gabor frequencies (default: 0.5 2.0 5.0 10.0 17.0 23.0)")
+    parser.add_argument("--gabor_scales", type=float, nargs="+", default=[1.0, 2.0, 3.0, 4.0, 5.0], 
+                        help="Gabor scales (default: 1.0 2.5 5.0 6.0 8.0 9.0)")
+    parser.add_argument("--gabor_frequencies", type=float, nargs="+", default=[0.1, 0.5, 2.0, 5.0, 6.0, 7.0], 
+                        help="Gabor frequencies (default: 0.1 0.5 2.0 5.0 6.0 7.0)")
     
     args = parser.parse_args()
     
@@ -69,10 +67,8 @@ def main():
     logger.info(f"Output:        {output_path}")
     logger.info(f"Patch Size (k): {args.patch_size}")
     logger.info(f"Stride (S):    {args.stride}")
-    logger.info(f"Omega:         {args.omega}")
-    logger.info(f"Beta High:     {args.beta_high}")
-    logger.info(f"Beta Low:      {args.beta_low}")
-    logger.info(f"R Min:         {args.r_min}")
+    logger.info(f"Scattered Suppress: {args.scattered_signal_suppress_coef}")
+    logger.info(f"Main Amplify: {args.main_signal_ampligy_coef}")
     logger.info(f"Gabor Scales:  {args.gabor_scales}")
     logger.info(f"Gabor Freqs:   {args.gabor_frequencies}")
     
@@ -87,11 +83,9 @@ def main():
         patch_size=args.patch_size,
         stride=args.stride,
         block_size=args.block_size,
-        omega=args.omega,
-        beta_high=args.beta_high,
-        beta_low=args.beta_low,
-        r_min=args.r_min,
         eps_thresh=args.eps_thresh,
+        scattered_signal_suppress_coef=args.scattered_signal_suppress_coef,
+        main_signal_ampligy_coef=args.main_signal_ampligy_coef,
         gabor_scales=args.gabor_scales,
         gabor_frequencies=args.gabor_frequencies
     )
