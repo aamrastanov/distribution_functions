@@ -15,11 +15,11 @@ sigma_est = np.mean(restoration.estimate_sigma(image))
 # Это "тяжелая артиллерия". Он ищет структуру, сравнивая фрагменты по всей картинке.
 # h: коэффициент фильтрации (чем выше, тем сильнее "гладит")
 image_nlm = restoration.denoise_nl_means(image, h=1.15 * sigma_est, fast_mode=True,
-                                        patch_size=5, patch_distance=6)
+                                        patch_size=10, patch_distance=17)
 
 # 4. Усиление того, что выжило (Адаптивный контраст)
 # После NLM структура станет видна, но будет бледной. Вытягиваем её.
-final_structure = exposure.equalize_adapthist(image_nlm, clip_limit=0.03)
+final_structure = exposure.equalize_adapthist(image_nlm, clip_limit=0.05)
 
 # Визуализация
 fig, ax = plt.subplots(1, 3, figsize=(18, 6))
